@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costos e Impuestos de Importación</title>
+    
+    <script>
+        const sesionActiva = localStorage.getItem('usuarioLogueado');
+        if (!sesionActiva) {
+            window.location.replace('login.html');
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-principal: #6A89A7;
+            --color-hover: #56718A;
+            --color-fondo: #f4f4f4;
+            --texto-blanco: #ffffff;
+            --texto-oscuro: #333333;
+            --color-exito: #52a05e;
+            --color-error: #c0392b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body { background-color: var(--color-fondo); display: flex; flex-direction: column; min-height: 100vh; }
+
+        .navbar { background-color: var(--color-principal); color: var(--texto-blanco); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-regresar { color: var(--texto-blanco); text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 500; padding: 8px 12px; border-radius: 5px; transition: background 0.3s; }
+        .btn-regresar:hover { background-color: var(--color-hover); }
+
+        .container { flex: 1; max-width: 1000px; width: 100%; margin: 30px auto; padding: 0 20px; }
+        h2 { color: var(--texto-oscuro); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        p.desc { color: #666; margin-bottom: 25px; font-size: 0.95rem; }
+
+        .card-calculadora { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 30px; max-width: 600px; margin: 0 auto; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group.full-width { grid-column: span 2; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--texto-oscuro); font-size: 0.9rem; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; outline: none; }
+        .input-group input:focus { border-color: var(--color-principal); }
+        
+        .btn-calcular { width: 100%; padding: 12px; background-color: var(--color-principal); color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-calcular:hover { background-color: var(--color-hover); }
+        
+        .resultados { margin-top: 25px; background: #eaeff3; padding: 20px; border-radius: 6px; border-left: 5px solid var(--color-principal); }
+        .resultado-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1rem; color: var(--texto-oscuro); }
+        .cantidades { text-align: right; }
+        .usd-val { font-weight: 600; color: var(--texto-oscuro); }
+        .gtq-val { display: block; font-size: 0.85rem; color: #666; margin-top: 2px; }
+        
+        .total-final { font-size: 1.2rem; border-top: 2px solid #ddd; padding-top: 15px; margin-top: 10px; font-weight: bold; }
+        .total-final .usd-val { color: var(--color-exito); font-size: 1.3rem; }
+        .total-final .gtq-val { color: var(--color-exito); font-size: 1rem; font-weight: bold; }
+        
+        .note { font-size: 0.8rem; color: #777; text-align: center; margin-top: 20px; line-height: 1.4; }
+
+        .footer { background-color: var(--color-principal); color: white; text-align: center; padding: 10px; font-size: 0.8rem; margin-top: auto; }
+
+        @media (max-width: 768px) {
+            .navbar { flex-wrap: wrap; gap: 10px; justify-content: center; padding: 10px; }
+            .container { padding: 0 15px; margin: 20px auto; }
+            .form-grid { grid-template-columns: 1fr; gap: 0; }
+            .card-calculadora { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="pantallaPrincipal.html" class="btn-regresar">
+            <i class="fa-solid fa-arrow-left"></i> <span>Volver al Menú</span>
+        </a>
+        <div><strong>Finanzas</strong></div>
+    </nav>
+
+    <div class="container">
+        <h2><i class="fa-solid fa-calculator"></i> Estimación de Costos e Impuestos totales</h2>
+        <p class="desc">Calcule el costo proyectado de internación para cada vehículo en base al valor CIF, aranceles de Guatemala y tasa de cambio.</p>
+
+        <div class="card-calculadora">
+            <form id="calcForm">
+                <div class="input-group full-width">
+                    <label>Precio del Vehículo en Origen (USD)</label>
+                    <input type="number" id="precioVehiculo" required placeholder="Ej. 5000" min="0" step="0.01">
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Flete Marítimo (USD)</label>
+                        <input type="number" id="flete" value="1200" required min="0" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>Seguro de Transporte (USD)</label>
+                        <input type="number" id="seguro" value="150" required min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Tasa de Cambio (Quetzales por $1.00)</label>
+                    <input type="number" id="tasaCambio" value="7.80" required min="1" step="0.01">
+                </div>
+
+                <button type="submit" class="btn-calcular">
+                    <i class="fa-solid fa-calculator"></i> Procesar Cálculo Operativo
+                </button>
+            </form>
+
+            <div class="resultados" id="panelResultados" style="display: none;">
+                <div class="resultado-item">
+                    <span>Valor CIF (Base Imponible):</span>
+                    <div class="cantidades">
+                        <span class="usd-val" id="cifUsd">$0.00</span>
+                        <span class="gtq-val" id="cifGtq">Q0.00</span>
+                    </div>
+                </div>
+                
+                <div class="resultado-item">
+                    <span style="color: var(--color-error); font-weight: 600;">Impuestos SAT Proyectados (Aprox 42%):</span>
+                    <div class="cantidades">
+                        <span class="usd-val" id="impUsd" style="color: var(--color-error);">$0.00</span>
+                        <span class="gtq-val" id="impGtq">Q0.00</span>
+                    </div>
+                </div>
+                
+                <div class="resultado-item total-final">
+                    <span>Costo Total Operativo:</span>
+                    <div class="cantidades">
+                        <span class="usd-val" id="totalUsd">$0.00</span>
+                        <span class="gtq-val" id="totalGtq">Q0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="note">* Los cálculos de impuestos (Suma de DAI + IVA + IPRIMA) representan estimaciones promedio fijas para uso del flujo interno de la importadora.</p>
+        </div>
+    </div>
+
+    <footer class="footer">Importadora Los Gemelos &copy; 2026</footer>
+
+    <script>
+        document.getElementById('calcForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const precio = parseFloat(document.getElementById('precioVehiculo').value) || 0;
+            const flete = parseFloat(document.getElementById('flete').value) || 0;
+            const seguro = parseFloat(document.getElementById('seguro').value) || 0;
+            const tasaCambio = parseFloat(document.getElementById('tasaCambio').value) || 7.80;
+
+            const TASA_TOTAL_IMPUESTOS = 0.42; 
+
+            const valorCifUsd = precio + flete + seguro;
+            const impuestosUsd = valorCifUsd * TASA_TOTAL_IMPUESTOS;
+            const costoTotalUsd = valorCifUsd + impuestosUsd;
+
+            const valorCifGtq = valorCifUsd * tasaCambio;
+            const impuestosGtq = impuestosUsd * tasaCambio;
+            const costoTotalGtq = costoTotalUsd * tasaCambio;
+
+            document.getElementById('cifUsd').textContent = '$' + valorCifUsd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('cifGtq').textContent = 'Q' + valorCifGtq.toLocaleString('es-GT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            document.getElementById('impUsd').textContent = '$' + impuestosUsd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('impGtq').textContent = 'Q' + impuestosGtq.toLocaleString('es-GT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            document.getElementById('totalUsd').textContent = '$' + costoTotalUsd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('totalGtq').textContent = 'Q' + costoTotalGtq.toLocaleString('es-GT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            document.getElementById('panelResultados').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

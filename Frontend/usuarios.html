@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <script>
+        const sesionActiva = localStorage.getItem('usuarioLogueado');
+
+        if (!sesionActiva) {
+            window.location.replace('login.html');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --color-principal: #6A89A7;
+            --color-hover: #56718A;
+            --color-fondo: #f4f4f4;
+            --texto-oscuro: #333333;
+            --color-peligro: #cb4343;
+            --color-edicion: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-fondo);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--color-principal);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-regresar {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card-formulario {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--color-principal);
+        }
+
+        .modo-edicion {
+            border-left-color: var(--color-edicion);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-guardar {
+            background-color: var(--color-principal);
+        }
+
+        .btn-cancelar {
+            background-color: #95a5a6;
+            display: none;
+        }
+
+        .card-tabla {
+            background: white;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #eaeff3;
+            color: var(--texto-oscuro);
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: #e3effa;
+            color: #2b6cb0;
+        }
+
+        .actions-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-edit {
+            background-color: var(--color-edicion);
+        }
+
+        .btn-delete {
+            background-color: var(--color-peligro);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .actions-btns {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .actions-btns .btn-action {
+                flex: 1 1 48%;
+            }
+
+            table th,
+            table td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="pantallaPrincipal.html" class="btn-regresar"><i class="fa-solid fa-arrow-left"></i> <span>Volver al
+                Menú</span></a>
+        <div><strong>Administración de Sistema</strong></div>
+    </nav>
+
+    <div class="container">
+        <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-users-gear"></i> Gestión de Usuarios</h2>
+
+        <div class="card-formulario" id="formCard">
+            <form id="usuarioForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="nombre" required placeholder="">
+                    </div>
+                    <div class="input-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" id="email" required placeholder="">
+                    </div>
+                    <div class="input-group">
+                        <label>Rol del Sistema</label>
+                        <select id="rol_id" required>
+                            <option value="">Seleccione un rol...</option>
+                            <option value="1">Administrador</option>
+                            <option value="2">Logística</option>
+                            <option value="3">Finanzas</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="contrasena" placeholder="Mínimo 6 caracteres" minlength="6">
+                        <small id="passHint" style="color:#777; font-size:0.75rem;">Obligatoria para usuarios
+                            nuevos.</small>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="btnSubmit" class="btn btn-guardar"><i class="fa-solid fa-plus"></i>
+                        Registrar Usuario</button>
+                    <button type="button" id="btnCancel" class="btn btn-cancelar" onclick="cancelarEdicion()"><i
+                            class="fa-solid fa-xmark"></i> Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Correo Electrónico</th>
+                        <th>Nivel de Acceso (Rol)</th>
+                        <th>Contraseña (DB)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaUsuarios"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/usuarios';
+        let modoEdicion = false;
+        let idUsuarioActual = null;
+
+        // 1. READ
+        async function cargarUsuarios() {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) return console.error("Error en el backend al obtener usuarios");
+
+                const usuarios = await res.json();
+                const tbody = document.getElementById('tablaUsuarios');
+                tbody.innerHTML = '';
+
+                usuarios.forEach(user => {
+                    const tr = document.createElement('tr');
+
+                    // Controlamos si la contraseña existe antes de recortarla para pruebas
+                    const passTexto = user.contrasena ? user.contrasena : 'Sin contraseña';
+                    const passVisual = passTexto.length > 20 ? passTexto.substring(0, 20) + '...' : passTexto;
+
+                    // Si por alguna razón el usuario no tiene rol en la tabla puente saldrá como 'Sin Rol'
+                    const rolVisual = user.nombre_rol ? user.nombre_rol : 'Sin Rol';
+
+                    tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td><strong>${user.nombre}</strong><br><small>${user.email}</small></td>
+                    <td><span class="badge">${rolVisual}</span></td>
+                    <td style="font-family: monospace; font-size: 0.8rem; color: #7f8c8d;">${passVisual}</td>
+                    <td>
+                        <div class="actions-btns">
+                            <button class="btn-action btn-edit" onclick="prepararEdicion(${user.id}, '${user.nombre}', '${user.email}', ${user.rol_id || 'null'})"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action btn-delete" onclick="eliminarUsuario(${user.id})"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) { console.error("Error en la petición de red:", error); }
+        }
+
+        // 2. CREATE / UPDATE
+        document.getElementById('usuarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                rol_id: parseInt(document.getElementById('rol_id').value),
+                contraseña: document.getElementById('contrasena').value
+            };
+
+            if (!modoEdicion && !datos.contraseña) {
+                alert("La contraseña es obligatoria para nuevos usuarios.");
+                return;
+            }
+
+            try {
+                const res = await fetch(modoEdicion ? `${API_URL}/${idUsuarioActual}` : API_URL, {
+                    method: modoEdicion ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                if (res.ok) {
+                    alert(modoEdicion ? "Usuario actualizado correctamente" : "Usuario creado correctamente");
+                    cancelarEdicion();
+                    cargarUsuarios();
+                } else {
+                    alert("Ocurrió un problema en el servidor al procesar el usuario.");
+                }
+            } catch (error) { console.error("Error al enviar el formulario:", error); }
+        });
+
+        // 3. Preparar Interfaz para Modificar
+        function prepararEdicion(id, nombre, email, rol_id) {
+            modoEdicion = true;
+            idUsuarioActual = id;
+
+            document.getElementById('nombre').value = nombre;
+            document.getElementById('email').value = email;
+            document.getElementById('rol_id').value = rol_id !== null ? rol_id : '';
+            document.getElementById('contrasena').value = '';
+
+            document.getElementById('passHint').innerText = "Dejar en blanco para mantener la actual.";
+            document.getElementById('contrasena').removeAttribute('required');
+
+            document.getElementById('formCard').classList.add('modo-edicion');
+            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-save"></i> Guardar Cambios';
+            document.getElementById('btnSubmit').style.backgroundColor = 'var(--color-edicion)';
+            document.getElementById('btnCancel').style.display = 'block';
+        }
+
+        // 4. Cancelar y limpiar formulario
+        function cancelarEdicion() {
+            modoEdicion = false;
+            idUsuarioActual = null;
+
+            document.getElementById('usuarioForm').reset();
+            document.getElementById('passHint').innerText = "Obligatoria para usuarios nuevos.";
+
+            document.getElementById('formCard').classList.remove('modo-edicion');
+            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-plus"></i> Registrar Usuario';
+            document.getElementById('btnSubmit').style.backgroundColor = 'var(--color-principal)';
+            document.getElementById('btnCancel').style.display = 'none';
+        }
+
+        // 5. DELETE
+        async function eliminarUsuario(id) {
+            if (!confirm("¿Dar de baja a este usuario? Perderá el acceso de inmediato.")) return;
+            try {
+                const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    cargarUsuarios();
+                } else {
+                    alert("No se pudo dar de baja al usuario.");
+                }
+            } catch (error) { console.error("Error al eliminar:", error); }
+        }
+
+        window.onload = cargarUsuarios;
+    </script>

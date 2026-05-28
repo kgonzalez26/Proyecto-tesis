@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Logístico</title>
+    <script>
+        const sesionActiva = localStorage.getItem('usuarioLogueado');
+
+        if (!sesionActiva) {
+            window.location.replace('login.html');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --color-principal: #6A89A7;
+            --color-hover: #56718A;
+            --color-fondo: #f4f4f4;
+            --texto-blanco: #ffffff;
+            --texto-oscuro: #333333;
+            --color-exito: #52a05e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-fondo);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: var(--color-principal);
+            color: var(--texto-blanco);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-regresar {
+            color: var(--texto-blanco);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .btn-regresar:hover {
+            background-color: var(--color-hover);
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            color: var(--texto-oscuro);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p.desc {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .card-tabla {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #eaeff3;
+            color: var(--texto-oscuro);
+            font-weight: 600;
+        }
+
+        .estado-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .select-estado {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            outline: none;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .select-estado:focus {
+            border-color: var(--color-principal);
+        }
+
+        .btn-actualizar {
+            background-color: var(--color-principal);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-actualizar:hover {
+            background-color: var(--color-hover);
+        }
+
+        .btn-actualizar:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .estado-actual-label {
+            font-size: 0.8rem;
+            display: block;
+            color: #777;
+            margin-bottom: 4px;
+        }
+
+        .footer {
+            background-color: var(--color-principal);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.8rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .container {
+                padding: 0 15px;
+                margin: 20px auto;
+            }
+
+            .estado-control {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-actualizar {
+                width: 100%;
+            }
+
+            table th,
+            table td {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="pantallaPrincipal.html" class="btn-regresar">
+            <i class="fa-solid fa-arrow-left"></i> <span>Volver al Menú</span>
+        </a>
+        <div><strong>Logística</strong></div>
+    </nav>
+
+    <div class="container">
+        <h2><i class="fa-solid fa-truck-fast"></i> Tracking y Trazabilidad de Unidades</h2>
+        <p class="desc">Actualice el estado físico de los vehículos. Los cambios se reflejarán inmediatamente en todo el
+            sistema.</p>
+
+        <div class="card-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>VIN de la Unidad</th>
+                        <th>Vehículo</th>
+                        <th>Fecha de Compra</th>
+                        <th>Control de Tracking (Estado)</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaTrackingBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">Importadora Los Gemelos &copy; 2026</footer>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/vehiculos';
+
+        async function cargarTracking() {
+            try {
+                const response = await fetch(API_URL);
+                const vehiculos = await response.json();
+                const tbody = document.getElementById('tablaTrackingBody');
+                tbody.innerHTML = '';
+
+                vehiculos.forEach(v => {
+                    const fechaFormateada = v.Fecha_Compra ? v.Fecha_Compra.split('T')[0] : 'Sin fecha';
+
+                    const fila = document.createElement('tr');
+
+                    fila.innerHTML = `
+                    <td><strong>${v.VIN_Unidad}</strong></td>
+                    <td>${v.Marca} ${v.Modelo} (${v.Anio})</td>
+                    <td>${fechaFormateada}</td>
+                    <td>
+                        <span class="estado-actual-label">Mover unidad hacia:</span>
+                        <div class="estado-control">
+                            <select id="select-${v.VIN_Unidad}" class="select-estado" onchange="habilitarBoton('${v.VIN_Unidad}')">
+                                <option value="En Tránsito" ${v.Estado_Actual === 'En Tránsito' ? 'selected' : ''}>En Tránsito</option>
+                                <option value="Aduana" ${v.Estado_Actual === 'Aduana' ? 'selected' : ''}>Aduana</option>
+                                <option value="Predio" ${v.Estado_Actual === 'Predio' ? 'selected' : ''}>Predio</option>
+                                <option value="Vendido" ${v.Estado_Actual === 'Vendido' ? 'selected' : ''}>Vendido</option>
+                            </select>
+                            <button id="btn-${v.VIN_Unidad}" class="btn-actualizar" onclick="guardarEstado('${v.VIN_Unidad}')" disabled>
+                                <i class="fa-solid fa-check"></i> Guardar
+                            </button>
+                        </div>
+                    </td>
+                `;
+                    tbody.appendChild(fila);
+                });
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+            }
+        }
+
+        function habilitarBoton(vin) {
+            const btn = document.getElementById(`btn-${vin}`);
+            btn.disabled = false;
+            btn.style.backgroundColor = 'var(--color-exito)';
+        }
+
+        async function guardarEstado(vin) {
+            const selectElement = document.getElementById(`select-${vin}`);
+            const nuevoEstado = selectElement.value;
+
+            try {
+                const response = await fetch(`${API_URL}/${vin}/estado`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`El estado del vehículo ${vin} se actualizó a: ${nuevoEstado}`);
+                    cargarTracking();
+                } else {
+                    alert(data.error || "Ocurrió un error al actualizar el estado.");
+                }
+            } catch (error) {
+                console.error("Error al conectar con el servidor:", error);
+                alert("Error de conexión con el servidor.");
+            }
+        }
+
+        window.onload = cargarTracking;
+    </script>
+</body>
+
+</html>
