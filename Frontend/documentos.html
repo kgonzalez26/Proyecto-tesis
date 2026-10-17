@@ -1,235 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentos Aduaneros</title>
-    <script>
-        // Buscamos si existe el registro del usuario en la memoria
-        const sesionActiva = localStorage.getItem('usuarioLogueado');
-        
-        // Si NO hay sesión (es null o undefined), lo expulsamos al login
-        if (!sesionActiva) {
-            // Usamos .replace() en lugar de .href para que no pueda usar el botón "Adelante"
-            window.location.replace('login.html'); 
-        }
-    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/navbar.css">
     <style>
         :root {
-            --color-principal: #6A89A7;
-            --color-hover: #56718A;
-            --color-fondo: #f4f4f4;
-            --texto-oscuro: #333333;
-            --color-ok: #27ae60;
-            --color-falta: #e74c3c;
+            --color-principal: #0F2A43; --color-hover: #F59E0B; --color-fondo: #f4f4f4;
+            --texto-oscuro: #333333; --color-ok: #27ae60; --color-falta: #e74c3c;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background-color: var(--color-fondo);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .navbar {
-            background-color: var(--color-principal);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-regresar {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
-
-        .container {
-            flex: 1;
-            max-width: 1200px;
-            width: 100%;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            font-size: 0.9rem;
-        }
-
-        th {
-            background-color: #eaeff3;
-            color: var(--texto-oscuro);
-        }
-
-        td.text-left {
-            text-align: left;
-        }
-
-        .icon-ok {
-            color: var(--color-ok);
-            font-size: 1.2rem;
-        }
-
-        .icon-falta {
-            color: var(--color-falta);
-            font-size: 1.2rem;
-        }
-
-        .btn-gestionar {
-            background-color: var(--color-principal);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-gestionar:hover {
-            background-color: var(--color-hover);
-        }
-
-        #panelArchivos {
-            display: none;
-            border-left: 5px solid var(--color-principal);
-        }
-
-        .grid-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .form-upload {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .form-upload select,
-        .form-upload input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .btn-subir {
-            background-color: var(--color-principal);
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 4px;
-        }
-
-        .lista-archivos {
-            list-style: none;
-        }
-
-        .lista-archivos li {
-            padding: 10px;
-            background: #f9f9f9;
-            border: 1px solid #eee;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 4px;
-        }
-
-        .btn-descargar {
-            color: var(--color-principal);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .card {
-            overflow-x: auto;
-        }
-
-        table {
-            min-width: 650px;
-        }
-
-        @media (max-width: 768px) {
-            .navbar {
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
-                padding: 10px;
-            }
-
-            .container {
-                padding: 0 15px;
-                margin: 20px auto;
-            }
-
-            .grid-panel {
-                grid-template-columns: 1fr;
-            }
-
-            .btn-gestionar {
-                width: 100%;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--color-fondo); display: flex; flex-direction: column; min-height: 100vh; }
+        .container { flex: 1; max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: center; min-width: 650px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; font-size: 0.9rem; }
+        th { background-color: #eaeff3; color: var(--texto-oscuro); }
+        td.text-left { text-align: left; }
+        .icon-ok { color: var(--color-ok); font-size: 1.2rem; }
+        .icon-falta { color: var(--color-falta); font-size: 1.2rem; }
+        .progreso-badge { font-weight: 700; }
+        .btn-gestionar { background-color: var(--color-principal); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+        .btn-gestionar:hover { background-color: var(--color-hover); }
+        #panelArchivos { display: none; border-left: 5px solid var(--color-principal); }
+        .grid-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-upload { display: flex; flex-direction: column; gap: 10px; }
+        .form-upload select, .form-upload input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-subir { background-color: var(--color-principal); color: white; border: none; padding: 10px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .lista-archivos { list-style: none; }
+        .lista-archivos li { padding: 10px; background: #f9f9f9; border: 1px solid #eee; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; }
+        .lista-archivos .estado-req { font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+        .estado-Pendiente { background: #fef3c7; color: #b45309; }
+        .estado-Entregado { background: #dcfce7; color: #15803d; }
+        .estado-Rechazado { background: #fee2e2; color: #b91c1c; }
+        .estado-Vencido { background: #fee2e2; color: #b91c1c; }
+        .btn-descargar { color: var(--color-principal); text-decoration: none; font-weight: bold; }
+        @media (max-width: 768px) { .grid-panel { grid-template-columns: 1fr; } .btn-gestionar { width: 100%; } }
     </style>
 </head>
-
 <body>
 
-    <nav class="navbar">
-        <a href="pantallaPrincipal.html" class="btn-regresar"><i class="fa-solid fa-arrow-left"></i> <span>Volver al
-                Menú</span></a>
-        <div><strong>Archivo Digital</strong></div>
-    </nav>
+    <div id="navbar-placeholder"></div>
 
     <div class="container">
-        <h2 style="margin-bottom: 20px; color: var(--texto-oscuro);"><i class="fa-solid fa-folder-open"></i> Checklist
-            de Expedientes</h2>
+        <h2 style="margin-bottom: 20px; color: var(--texto-oscuro);"><i class="fa-solid fa-folder-open"></i> Checklist de Expedientes</h2>
 
         <div class="card">
             <table>
                 <thead>
-                    <tr>
-                        <th class="text-left">VIN / Vehículo</th>
-                        <th>Título</th>
-                        <th>DUA</th>
-                        <th>Póliza</th>
-                        <th>Cert. Origen</th>
-                        <th>Acción</th>
-                    </tr>
+                    <tr><th class="text-left">VIN / Vehículo</th><th>Requisitos Entregados</th><th>Acción</th></tr>
                 </thead>
                 <tbody id="tablaChecklist"></tbody>
             </table>
@@ -237,143 +58,31 @@
 
         <div class="card" id="panelArchivos">
             <h3 id="tituloPanel" style="margin-bottom: 15px; color: var(--color-principal);">Gestionando Expediente</h3>
-
             <div class="grid-panel">
                 <div>
-                    <h4>Subir Nuevo Documento</h4><br>
+                    <h4>Subir Documento</h4><br>
                     <form class="form-upload" id="formSubir">
                         <input type="hidden" id="expIdOculto">
-                        <select id="tipoDoc" required>
-                            <option value="">Seleccione el tipo de documento...</option>
-                            <option value="Título">Título de Propiedad</option>
-                            <option value="DUA">DUA</option>
-                            <option value="Póliza">Póliza de Importación</option>
-                            <option value="Certificado_Origen">Certificado de Origen</option>
+                        <select id="reqSelect" required>
+                            <option value="">Seleccione el requisito...</option>
                         </select>
-                        <input type="file" id="archivoFisico" required accept=".pdf, image/jpeg, image/png">
-                        <button type="submit" class="btn-subir"><i class="fa-solid fa-cloud-arrow-up"></i> Subir
-                            Archivo</button>
+                        <input type="file" id="archivoFisico" required accept=".pdf,image/jpeg,image/png">
+                        <button type="submit" class="btn-subir"><i class="fa-solid fa-cloud-arrow-up"></i> Subir Archivo</button>
                     </form>
                 </div>
-
                 <div>
-                    <h4>Documentos Archivados</h4><br>
-                    <ul class="lista-archivos" id="listaArchivosRender">
-                    </ul>
+                    <h4>Checklist de este expediente</h4><br>
+                    <ul class="lista-archivos" id="listaArchivosRender"></ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const API_URL = 'http://localhost:3000/api/documentos';
+    <footer style="background-color: var(--color-principal); color: white; text-align: center; padding: 10px; font-size: 0.8rem; margin-top: auto;">
+        Importadora Los Gemelos &copy; 2026
+    </footer>
 
-        let documentosActuales = [];
-
-        async function cargarChecklist() {
-            try {
-                const res = await fetch(API_URL);
-                const expedientes = await res.json();
-                const tbody = document.getElementById('tablaChecklist');
-                tbody.innerHTML = '';
-
-                expedientes.forEach(exp => {
-                    const icono = (estado) => estado === 1 ? '<i class="fa-solid fa-circle-check icon-ok"></i>' : '<i class="fa-solid fa-circle-xmark icon-falta"></i>';
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                    <td class="text-left"><strong>${exp.VIN_Unidad}</strong><br><small>${exp.Marca} ${exp.Modelo}</small></td>
-                    <td>${icono(exp.Check_Titulo_Propiedad)}</td>
-                    <td>${icono(exp.Check_DUA)}</td>
-                    <td>${icono(exp.Check_Poliza)}</td>
-                    <td>${icono(exp.Check_Certificado_Origen)}</td>
-                    <td>
-                        <button class="btn-gestionar" onclick="abrirPanel(${exp.EXP_ID}, '${exp.VIN_Unidad}')">Gestionar</button>
-                    </td>
-                `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) { console.error(error); }
-        }
-
-        async function abrirPanel(exp_id, vin) {
-            document.getElementById('panelArchivos').style.display = 'block';
-            document.getElementById('tituloPanel').innerText = `Gestionando Documentos - VIN: ${vin}`;
-            document.getElementById('expIdOculto').value = exp_id;
-            document.getElementById('panelArchivos').scrollIntoView({ behavior: 'smooth' });
-
-            cargarArchivosDelExpediente(exp_id);
-        }
-
-        async function cargarArchivosDelExpediente(exp_id) {
-            const ul = document.getElementById('listaArchivosRender');
-            ul.innerHTML = 'Cargando...';
-            try {
-                const res = await fetch(`${API_URL}/${exp_id}`);
-                const archivos = await res.json();
-                ul.innerHTML = '';
-
-                documentosActuales = archivos.map(doc => doc.Tipo_Documento_Aduanal);
-
-                if (archivos.length === 0) {
-                    ul.innerHTML = '<li>No hay documentos cargados aún.</li>';
-                    return;
-                }
-
-                archivos.forEach(doc => {
-                    ul.innerHTML += `
-                    <li>
-                        <span><i class="fa-solid fa-file-pdf"></i> ${doc.Tipo_Documento_Aduanal}</span>
-                        <a href="http://localhost:3000${doc.Ruta_Archivo_Cloud}" target="_blank" class="btn-descargar">Ver / Descargar</a>
-                    </li>
-                `;
-                });
-            } catch (error) { console.error(error); }
-        }
-
-        document.getElementById('formSubir').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const exp_id = document.getElementById('expIdOculto').value;
-            const tipo = document.getElementById('tipoDoc').value;
-            const fileInput = document.getElementById('archivoFisico').files[0];
-
-            let sobreescribir = 'false';
-
-            if (documentosActuales.includes(tipo)) {
-                const confirmar = confirm(`El documento "${tipo}" ya está cargado.\n\n¿Deseas sobreescribirlo con esta nueva versión? (La versión anterior se archivará)`);
-                if (!confirmar) {
-                    return;
-                }
-                sobreescribir = 'true';
-            }
-
-            const formData = new FormData();
-            formData.append('exp_id', exp_id);
-            formData.append('tipo_documento', tipo);
-            formData.append('archivoFisico', fileInput);
-            formData.append('sobreescribir', sobreescribir);
-
-            try {
-                const res = await fetch(`${API_URL}/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (res.ok) {
-                    alert("Documento guardado con éxito.");
-                    document.getElementById('formSubir').reset();
-                    cargarChecklist();
-                    cargarArchivosDelExpediente(exp_id);
-                } else {
-                    const data = await res.json();
-                    alert(data.error || "Error al subir archivo");
-                }
-            } catch (error) { console.error("Error de red:", error); }
-        });
-
-        window.onload = cargarChecklist;
-    </script>
+    <script src="/components/navbar.js" defer></script>
+    <script src="/js/documentos.js" defer></script>
 </body>
-
 </html>

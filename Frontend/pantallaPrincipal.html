@@ -1,341 +1,271 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Principal</title>
-    <script>
-        const sesionActiva = localStorage.getItem('usuarioLogueado');
-
-        if (!sesionActiva) {
-            window.location.replace('login.html');
-        }
-    </script>
-
+    <title>Vehículos - Importadora Los Gemelos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/navbar.css">
     <style>
         :root {
-            --color-principal: #6A89A7;
-            --color-hover: #56718A;
-            --color-fondo: #f4f4f4;
+            --color-principal: #0F2A43;
+            --color-hover: #F59E0B;
+            --color-fondo: #e9ecef;
             --texto-blanco: #ffffff;
             --texto-oscuro: #333333;
+            --border-color: #e2e8f0;
+            --azul-transito: #0284c7;
+            --amarillo-aduana: #d97706;
+            --verde-predio: #16a34a;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--color-fondo); display: flex; flex-direction: column; min-height: 100vh; color: var(--texto-oscuro); }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        .main-container { flex: 1; max-width: 1200px; width: 100%; margin: 25px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px; }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; }
+        .header-actions h2 { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
 
-        body {
-            background-color: var(--color-fondo);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        .btn-primary { background-color: var(--color-principal); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; text-transform: uppercase; }
+        .btn-primary:hover { background-color: var(--color-hover); }
 
-        .navbar {
-            background-color: var(--color-principal);
-            color: var(--texto-blanco);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+        .filters-card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .filters-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 0.78rem; font-weight: 700; color: #475569; }
+        .filter-group input, .filter-group select { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.86rem; outline: none; background: white; }
+        .filter-group input:focus, .filter-group select:focus { border-color: var(--color-principal); }
+        .filter-actions, .pagination-bar, .pagination-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .filter-actions { margin-top: 14px; }
+        .filter-hint, #resultadoConteo { color: #64748b; font-size: 0.78rem; }
+        .filter-buttons, .pagination-actions { display: flex; align-items: center; gap: 8px; }
+        .btn-filter { padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; color: #334155; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+        .btn-filter.primary { border-color: var(--color-principal); background: var(--color-principal); color: white; }
+        .btn-filter:disabled { opacity: 0.45; cursor: not-allowed; }
+        .pagination-bar { margin: 0 0 12px; }
 
-        .nav-links {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .kpi-card { background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-left: 5px solid transparent; }
+        .kpi-card.total { border-left-color: var(--color-principal); }
+        .kpi-card.transito { border-left-color: var(--azul-transito); }
+        .kpi-card.aduana { border-left-color: var(--amarillo-aduana); }
+        .kpi-card.predio { border-left-color: var(--verde-predio); }
+        .kpi-info h3 { font-size: 1.8rem; font-weight: 800; color: #0f172a; line-height: 1; }
+        .kpi-info p { font-size: 0.82rem; color: #64748b; font-weight: 600; margin-top: 4px; }
+        .kpi-icon { font-size: 1.8rem; opacity: 0.8; width: 32px; height: 32px; stroke-width: 2px; flex-shrink: 0;}
+        
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 15px;
-            color: var(--texto-blanco);
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: background 0.3s;
-        }
+        .section-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow-x: auto; }
+        .section-card h3 { font-size: 1.1rem; color: #1e293b; margin-bottom: 16px; font-weight: 700; }
 
-        .nav-item:hover,
-        .nav-item.active {
-            background-color: var(--color-hover);
-        }
+        .data-table { width: 100%; min-width: 750px; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+        .data-table th { background: #f8fafc; color: #475569; font-weight: 700; padding: 12px 14px; border-bottom: 2px solid #e2e8f0; }
+        .data-table td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .data-table tr:hover { background-color: #f8fafc; }
 
-        .nav-item i {
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-        }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; display: inline-block; white-space: nowrap; }
+        .badge-inicio { background: #f3e8ff; color: #6b21a8; }
+        .badge-transito { background: #e0f2fe; color: #0369a1; }
+        .badge-aduana { background: #fef3c7; color: #b45309; }
+        .badge-predio { background: #dcfce7; color: #15803d; }
+        .badge-vendido { background: #fee2e2; color: #b91c1c; }
 
-        .logout-btn {
-            font-size: 1.5rem;
-            color: var(--texto-blanco);
-            text-decoration: none;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 50%;
-            transition: background 0.3s;
-        }
+        .btn-gestionar { background: var(--color-principal); color: white; border: none; padding: 6px 14px; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.2s; display: inline-block; }
+        .btn-gestionar:hover { background: var(--color-hover); }
 
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
+        .doc-progreso { font-size: 0.8rem; font-weight: 700; }
+        .doc-progreso.completo { color: var(--verde-predio); }
+        .doc-progreso.incompleto { color: var(--amarillo-aduana); }
 
-        .main-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: white; border-radius: 8px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-header { background: var(--color-principal); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; }
+        .modal-header h3 { font-size: 1.1rem; font-weight: 700; }
+        .modal-close { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.8rem; font-weight: 700; color: #475569; }
+        .form-group input, .form-group select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.88rem; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--color-principal); }
+        .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-footer { padding: 14px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-cancel { background: white; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: #475569; }
+        .btn-save { background: var(--color-principal); color: white; border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
+        .btn-save:hover { background: var(--color-hover); }
 
-        .logo-central {
-            margin-bottom: 30px;
-            background: white;
-            border-radius: 50%;
-            width: 140px;
-            height: 140px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 4px solid var(--color-principal);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
+        .footer { background-color: var(--color-principal); color: var(--texto-blanco); text-align: center; padding: 12px; font-size: 0.8rem; margin-top: auto; }
 
-        .logo-central img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            padding: 10px;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: var(--texto-blanco);
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .navbar-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: white;
-            padding: 4px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            width: 100%;
-            max-width: 900px;
-        }
-
-        .dashboard-card {
-            background-color: var(--color-principal);
-            /* Actualizado al nuevo azul */
-            color: var(--texto-blanco);
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 140px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, background 0.3s;
-            text-align: center;
-            padding: 10px;
-        }
-
-        .dashboard-card:hover {
-            background-color: var(--color-hover);
-            transform: translateY(-5px);
-            cursor: pointer;
-        }
-
-        .dashboard-card i {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-
-        .dashboard-card span {
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        .footer {
-            background-color: var(--color-principal);
-            color: var(--texto-blanco);
-            text-align: center;
-            padding: 10px;
-            font-size: 0.8rem;
-            margin-top: auto;
-        }
-
-        @media (max-width: 992px) {
-            .navbar {
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
-                padding: 10px;
-            }
-
-            .nav-links {
-                justify-content: center;
-                flex-wrap: wrap;
-                width: 100%;
-            }
-
-            .navbar-brand {
-                justify-content: center;
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .nav-item {
-                padding: 10px 12px;
-                font-size: 0.8rem;
-            }
-
-            .logout-btn {
-                align-self: flex-end;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-links {
-                gap: 8px;
-            }
-
-            .navbar {
-                padding: 8px;
-            }
-        }
+        @media (max-width: 900px) { .filters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } }
+        @media (max-width: 520px) { .filters-grid { grid-template-columns: 1fr; } .filter-actions, .pagination-bar { align-items: flex-start; flex-direction: column; } }
     </style>
 </head>
-
 <body>
 
-    <nav class="navbar">
-        <a href="#" class="navbar-brand">
-            <img src="assets/images/logo.jpg" alt="Logo de la empresa" class="navbar-logo">
-            <span>Importadora Los Gemelos</span>
-        </a>
-
-        <div class="nav-links">
-            <a href="#" class="nav-item active">
-                <i class="fa-solid fa-house"></i>
-                <span>Menú</span>
-            </a>
-            <a href="vehiculos.html" class="nav-item">
-                <i class="fa-solid fa-car-side"></i>
-                <span>Vehículos</span>
-            </a>
-            <a href="tracking.html" class="nav-item">
-                <i class="fa-solid fa-truck-fast"></i>
-                <span>Logística</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-                <span>Finanzas</span>
-            </a>
-            <a href="usuarios.html" class="nav-item">
-                <i class="fa-solid fa-users"></i>
-                <span>Personal</span>
-            </a>
-        </div>
-        <a id="logoutLink" class="logout-btn" title="Cerrar Sesión Segura">
-            <i class="fa-solid fa-power-off"></i>
-        </a>
-    </nav>
+    <div id="navbar-placeholder"></div>
 
     <main class="main-container">
-
-        <div class="logo-central">
-            <img src="assets/images/logo.jpg" alt="Logo de la empresa">
+        <div class="header-actions">
+            <h2>Gestión de vehículos en Importación</h2>
+            <button class="btn-primary" id="btnNuevoVehiculo"><i class="fa-solid fa-plus"></i> NUEVO VEHÍCULO</button>
         </div>
 
-        <div class="dashboard-grid">
-            <a href="vehiculos.html" class="dashboard-card">
-                <i class="fa-solid fa-car"></i>
-                <span>Registro de Vehículos</span>
-            </a>
-            <a href="tracking.html" class="dashboard-card">
-                <i class="fa-solid fa-truck-fast"></i>
-                <span>Tracking Logístico</span>
-            </a>
-            <a href="documentos.html" class="dashboard-card">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span>Documentos Aduaneros</span>
-            </a>
-            <a href="calculadoraCostos.html" class="dashboard-card">
-                <i class="fa-solid fa-calculator"></i>
-                <span>Costos e Impuestos</span>
-            </a>
-            <a href="#" class="dashboard-card">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>Reportes de Rentabilidad</span>
-            </a>
-            <a href="#" class="dashboard-card">
-                <i class="fa-solid fa-wrench"></i>
-                <span>Consultas de estado de vehículos</span>
-            </a>
-            <a href="usuarios.html" class="dashboard-card">
-                <i class="fa-solid fa-users-gear"></i>
-                <span>Gestión de Usuarios</span>
-            </a>
-            <a href="#" class="dashboard-card">
-                <i class="fa-solid fa-gear"></i>
-                <span>Configuración</span>
-            </a>
+        <form class="filters-card" id="formFiltrosVehiculos">
+            <div class="filters-grid">
+                <div class="filter-group"><label for="filtroVin">VIN / Chasis</label><input id="filtroVin" type="text" placeholder=""></div>
+                <div class="filter-group"><label for="filtroCliente">Cliente</label><input id="filtroCliente" type="text" placeholder=""></div>
+                <div class="filter-group"><label for="filtroMarca">Marca</label><input id="filtroMarca" type="text" placeholder=""></div>
+                <div class="filter-group"><label for="filtroModelo">Modelo</label><input id="filtroModelo" type="text" placeholder=""></div>
+                <div class="filter-group"><label for="filtroAnio">Año</label><input id="filtroAnio" type="number" min="1900" max="2100" step="1" placeholder=""></div>
+                <div class="filter-group"><label for="filtroLote">Lote</label><input id="filtroLote" type="text" placeholder=""></div>
+                <div class="filter-group"><label for="filtroEstado">Estado logístico</label><select id="filtroEstado"><option value="">Todos los estados</option></select></div>
+                <div class="filter-group"><label for="filtroAsignacion">Asignación</label><select id="filtroAsignacion"><option value="">Todos</option><option value="asignado">Con cliente</option><option value="sin_asignar">Sin cliente / inventario propio</option></select></div>
+                <div class="filter-group"><label for="filtroDocumentosEntregados">Documentos entregados</label><input id="filtroDocumentosEntregados" type="number" min="0" step="1" placeholder="Cantidad exacta"></div>
+                <div class="filter-group"><label for="filtroDocumentosTotales">Documentos requeridos</label><input id="filtroDocumentosTotales" type="number" min="0" step="1" placeholder="Cantidad exacta"></div>
+            </div>
+            <div class="filter-actions">
+                <span class="filter-hint">Los campos de texto buscan coincidencias desde el inicio; puedes combinar varios filtros.</span>
+                <div class="filter-buttons">
+                    <button class="btn-filter" type="button" id="btnLimpiarFiltros"><i class="fa-solid fa-rotate-left"></i> Limpiar</button>
+                    <button class="btn-filter primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="kpi-grid">
+    <div class="kpi-card total">
+        <div class="kpi-info">
+            <h3 id="kpiTotal">0</h3>
+            <p>Total Unidades</p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="kpi-icon" style="color: var(--color-principal);">
+            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 1 12v4c0 .6.4 1 1 1h2"/>
+            <circle cx="7" cy="17" r="2"/>
+            <circle cx="17" cy="17" r="2"/>
+        </svg>
+    </div>
+
+    <div class="kpi-card transito">
+        <div class="kpi-info">
+            <h3 id="kpiTransito">0</h3>
+            <p>En Tránsito</p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="kpi-icon" style="color: var(--azul-transito);">
+            <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+            <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76"/>
+            <path d="M19 10 12 7 5 10"/>
+            <path d="M12 7V3"/>
+            <path d="m10 5 2-2 2 2"/>
+        </svg>
+    </div>
+
+    <div class="kpi-card aduana">
+        <div class="kpi-info">
+            <h3 id="kpiAduana">0</h3>
+            <p>En Trámite Aduanero</p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" class="kpi-icon" style="color: var(--amarillo-aduana);">
+            <path
+                d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35a2 2 0 0 1 .85-1.63l8-5.83a2 2 0 0 1 2.3 0l8 5.83a2 2 0 0 1 .85 1.63Z" />
+            <path d="M6 18h12" />
+            <path d="M6 14h12" />
+            <path d="M6 10h12" />
+            <path d="M12 22V10" />
+        </svg>
+    </div>
+    
+    <div class="kpi-card predio">
+        <div class="kpi-info">
+            <h3 id="kpiPredio">0</h3>
+            <p>En Predio / Listos</p>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" class="kpi-icon" style="color: var(--verde-predio);">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" />
+        </svg>
+    </div>
+
+    </div>
+        <div class="section-card">
+            <h3>Listado de Vehículos</h3>
+            <div class="pagination-bar">
+                <span id="resultadoConteo">Cargando inventario...</span>
+                <div class="pagination-actions">
+                    <button class="btn-filter" type="button" id="btnPaginaAnterior" disabled><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+                    <span id="etiquetaPagina" aria-live="polite">Página 1</span>
+                    <button class="btn-filter" type="button" id="btnPaginaSiguiente" disabled>Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>VIN</th><th>Cliente</th><th>Marca / Modelo</th><th>Año</th><th>Lote</th>
+                        <th>Estado Actual</th><th>Documentos</th><th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaVehiculosBody">
+                    <tr><td colspan="8" style="text-align: center; color: #888; padding: 20px;">Cargando inventario de vehículos...</td></tr>
+                </tbody>
+            </table>
         </div>
     </main>
 
-    <footer class="footer">
-        Importadora Los Gemelos - Sistema de Gestión Logística y Financiera &copy; 2026
-    </footer>
+    <div class="modal-overlay" id="modalVehiculo">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Nuevo Registro de Vehículo</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="formNuevoVehiculo">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>VIN / Chasis</label>
+                        <input type="text" id="inputVin" required placeholder="Ingrese los 17 dígitos del VIN">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Marca</label><input type="text" id="inputMarca" required placeholder=""></div>
+                        <div class="form-group"><label>Modelo</label><input type="text" id="inputModelo" required placeholder=""></div>
+                        <div class="form-group"><label>Año</label><select id="selectAnio" required><option value="">Seleccionar</option></select></div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label>Cilindrada (CC)</label><input type="number" id="inputCilindrada" placeholder=""></div>
+                        <div class="form-group">
+                            <label>Origen / Subasta</label>
+                            <select id="selectOrigen">
+                                <option value="Copart">Copart</option>
+                                <option value="IAAI">IAAI</option>
+                                <option value="Manheim">Manheim</option>
+                                <option value="Particular">Particular</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label>Lote #</label><input type="text" id="inputLote" placeholder="Número de Lote"></div>
+                        <div class="form-group"><label>Precio de Compra (USD)</label><input type="number" step="0.01" id="inputPrecio" placeholder="USD $"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente (opcional — vacío = inventario propio)</label>
+                        <select id="selectCliente"><option value="">Inventario propio</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Compra</label>
+                        <input type="date" id="inputFechaCompra" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="btnCancelarModal">Cancelar</button>
+                    <button type="submit" class="btn-save">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <script>
-        function cerrarSesion() {
-                try {
-                localStorage.removeItem('usuarioLogueado');
-                localStorage.removeItem('token');
-            } catch (err) {
-                console.warn('Error limpiando localStorage:', err);
-            }
+    <footer class="footer">Importadora Los Gemelos &copy; 2026</footer>
 
-            window.location.replace('login.html');
-        }
-
-        document.getElementById('logoutLink').addEventListener('click', function (e) {
-            e.preventDefault();
-            cerrarSesion();
-        });
-    </script>
-
+    <script src="/components/navbar.js" defer></script>
+    <script src="/js/pantallaPrincipal.js" defer></script>
 </body>
-
 </html>

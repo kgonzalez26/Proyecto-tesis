@@ -1,0 +1,44 @@
+# Uso local: docker compose up -d --build
+services:
+  db:
+    image: mysql:8.0
+    container_name: gemelos_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306" # Solo desarrollo; no publicar en producción.
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d
+
+  app:
+    build: ./Backend
+    container_name: gemelos_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      PORT: 3000
+      # En local debe ser development: la cookie secure requiere HTTPS.
+      NODE_ENV: development
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_ORIGIN: http://localhost:3000
+      ADMIN_NOMBRE: ${ADMIN_NOMBRE}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      - db
+    volumes:
+      - ./uploads:/app/uploads
+      - ./Frontend:/app/public
+
+volumes:
+  db_data:

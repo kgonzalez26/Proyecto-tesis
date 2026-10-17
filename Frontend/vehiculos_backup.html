@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Vehículos</title>
+    <script>
+        const sesionActiva = localStorage.getItem('usuarioLogueado');
+
+        if (!sesionActiva) {
+            window.location.replace('login.html');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --color-principal: #6A89A7;
+            --color-hover: #56718A;
+            --color-fondo: #f4f4f4;
+            --texto-blanco: #ffffff;
+            --texto-oscuro: #333333;
+            --color-exito: #52a05e;
+            --color-peligro: #cb4343;
+            --color-edicion: #f39c12;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body { background-color: var(--color-fondo); display: flex; flex-direction: column; min-height: 100vh; }
+
+        .navbar { background-color: var(--color-principal); color: var(--texto-blanco); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-regresar { color: var(--texto-blanco); text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 500; padding: 8px 12px; border-radius: 5px; transition: background 0.3s; }
+        .btn-regresar:hover { background-color: var(--color-hover); }
+
+        .container { flex: 1; max-width: 1100px; width: 100%; margin: 30px auto; padding: 0 20px; }
+        h2 { color: var(--texto-oscuro); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .card-formulario { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 5px solid var(--color-principal); transition: all 0.3s ease; }
+        .modo-edicion { border-left: 5px solid var(--color-edicion); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.9rem; color: #555; font-weight: 500; }
+        .input-group input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.95rem; }
+        .input-group input:focus { outline: none; border-color: var(--color-principal); }
+        .input-group input:disabled { background-color: #e9ecef; cursor: not-allowed; }
+
+        .form-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-guardar { background-color: var(--color-principal); color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; flex: 1; transition: background 0.3s; }
+        .btn-guardar:hover { background-color: var(--color-hover); }
+        .btn-cancelar { background-color: #95a5a6; color: white; border: none; padding: 12px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; display: none; transition: background 0.3s; }
+        .btn-cancelar:hover { background-color: #7f8c8d; }
+
+        .card-tabla { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 15px; border-bottom: 1px solid #ddd; font-size: 0.95rem; }
+        th { background-color: #eaeff3; color: var(--texto-oscuro); font-weight: 600; }
+
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-align: center; display: inline-block; }
+        .badge-transito { background: #e3effa; color: #2b6cb0; }
+        .badge-aduana { background: #fef3c7; color: #d97706; }
+        .badge-predio { background: #d1fae5; color: #065f46; }
+        .badge-vendido { background: #f3f4f6; color: #374151; }
+
+        .actions-btns { display: flex; gap: 8px; }
+        .btn-action { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: white; font-size: 0.85rem; }
+        .btn-edit { background-color: var(--color-edicion); }
+        .btn-edit:hover { background-color: #d68910; }
+        .btn-delete { background-color: var(--color-peligro); }
+        .btn-delete:hover { background: #a63232; }
+
+        .footer { background-color: var(--color-principal); color: white; text-align: center; padding: 10px; font-size: 0.8rem; margin-top: auto; }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions button {
+                width: 100%;
+            }
+
+            table th,
+            table td {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="pantallaPrincipal.html" class="btn-regresar">
+            <i class="fa-solid fa-arrow-left"></i> <span>Volver al Menú</span>
+        </a>
+        <div><strong>Importadora Los Gemelos</strong></div>
+    </nav>
+
+    <div class="container">
+        <h2><i class="fa-solid fa-car"></i> Control de Inventario de Vehículos</h2>
+
+        <div class="card-formulario" id="formCard">
+            <form id="vehiculoForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="vin">Número de VIN</label>
+                        <input type="text" id="vin" placeholder="" required maxlength="20">
+                    </div>
+                    <div class="input-group">
+                        <label for="marca">Marca</label>
+                        <input type="text" id="marca" placeholder="" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="modelo">Modelo</label>
+                        <input type="text" id="modelo" placeholder="" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="anio">Año</label>
+                        <input type="number" id="anio" placeholder="" required min="1980" max="2027">
+                    </div>
+                    <div class="input-group">
+                        <label for="fecha">Fecha de Compra</label>
+                        <input type="date" id="fecha" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="btnSubmit" class="btn-guardar"><i class="fa-solid fa-plus"></i> Registrar Vehículo</button>
+                    <button type="button" id="btnCancel" class="btn-cancelar" onclick="cancelarEdicion()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-tabla">
+            <table>
+                <thead>
+                    <tr>
+                        <th>VIN</th>
+                        <th>Marca / Modelo</th>
+                        <th>Año</th>
+                        <th>Fecha Compra</th>
+                        <th>Estado Actual</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaVehiculosBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">ImportadoraLos Gemelos &copy; 2026</footer>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/vehiculos';
+        
+        let modoEdicion = false;
+        let vinActual = '';
+
+        async function cargarVehiculos() {
+            try {
+                const response = await fetch(API_URL);
+                const vehiculos = await response.json();
+                const tbody = document.getElementById('tablaVehiculosBody');
+                tbody.innerHTML = ''; 
+
+                vehiculos.forEach(v => {
+                    let classBadge = 'badge-transito';
+                    if(v.Estado_Actual === 'Aduana') classBadge = 'badge-aduana';
+                    if(v.Estado_Actual === 'Predio') classBadge = 'badge-predio';
+                    if(v.Estado_Actual === 'Vendido') classBadge = 'badge-vendido';
+
+                    const fechaFormateada = v.Fecha_Compra.split('T')[0];
+
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td><strong>${v.VIN_Unidad}</strong></td>
+                        <td>${v.Marca} ${v.Modelo}</td>
+                        <td>${v.Anio}</td>
+                        <td>${fechaFormateada}</td>
+                        <td><span class="badge ${classBadge}">${v.Estado_Actual}</span></td>
+                        <td>
+                            <div class="actions-btns">
+                                <button class="btn-action btn-edit" onclick="prepararEdicion('${v.VIN_Unidad}', '${v.Marca}', '${v.Modelo}', '${v.Anio}', '${fechaFormateada}')" title="Editar Datos"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-action btn-delete" onclick="eliminarVehiculo('${v.VIN_Unidad}')" title="Dar de baja"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+            }
+        }
+
+        document.getElementById('vehiculoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const datosVehiculo = {
+                VIN_Unidad: document.getElementById('vin').value,
+                Marca: document.getElementById('marca').value,
+                Modelo: document.getElementById('modelo').value,
+                Anio: parseInt(document.getElementById('anio').value),
+                Fecha_Compra: document.getElementById('fecha').value
+            };
+
+            try {
+                let response;
+                if (!modoEdicion) {
+                    response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(datosVehiculo)
+                    });
+                } else {
+                    response = await fetch(`${API_URL}/${vinActual}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(datosVehiculo)
+                    });
+                }
+
+                if(response.ok) {
+                    alert(modoEdicion ? "Datos actualizados correctamente." : "Vehículo registrado con éxito.");
+                    cancelarEdicion();
+                    cargarVehiculos();
+                } else {
+                    alert("Error al procesar la solicitud.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        });
+
+        function prepararEdicion(vin, marca, modelo, anio, fecha) {
+            modoEdicion = true;
+            vinActual = vin;
+
+            document.getElementById('vin').value = vin;
+            document.getElementById('vin').disabled = true;
+            document.getElementById('marca').value = marca;
+            document.getElementById('modelo').value = modelo;
+            document.getElementById('anio').value = anio;
+            document.getElementById('fecha').value = fecha;
+
+            document.getElementById('formCard').classList.add('modo-edicion');
+            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-save"></i> Actualizar Datos';
+            document.getElementById('btnSubmit').style.backgroundColor = 'var(--color-edicion)';
+            document.getElementById('btnCancel').style.display = 'block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicion() {
+            modoEdicion = false;
+            vinActual = '';
+            
+            document.getElementById('vehiculoForm').reset();
+            document.getElementById('vin').disabled = false;
+            
+            document.getElementById('formCard').classList.remove('modo-edicion');
+            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-plus"></i> Registrar Vehículo';
+            document.getElementById('btnSubmit').style.backgroundColor = 'var(--color-principal)';
+            document.getElementById('btnCancel').style.display = 'none';
+        }
+
+        async function eliminarVehiculo(vin) {
+            if(!confirm(`¿Estás seguro de dar de baja la unidad con VIN: ${vin}?`)) return;
+            try {
+                const response = await fetch(`${API_URL}/${vin}`, { method: 'DELETE' });
+                if (response.ok) cargarVehiculos();
+            } catch (error) {
+                console.error("Error al eliminar:", error);
+            }
+        }
+
+        window.onload = cargarVehiculos;
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Caddyfile
+# Reemplaza 'tudominio.com' por tu dominio real, apuntado por DNS (registro A) a la IP de tu Hetzner.
+# Caddy obtiene y renueva el certificado Let's Encrypt automáticamente: no hay
+# nada más que configurar para tener HTTPS real.
+
+tudominio.com {
+    reverse_proxy app:3000
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expediente de Vehículo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <style>
+        :root {
+            --color-principal: #0F2A43; --color-hover: #F59E0B; --color-fondo: #e9ecef;
+            --texto-oscuro: #333333; --border-color: #e2e8f0; --color-ok: #16a34a; --color-falta: #dc2626;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--color-fondo); display: flex; flex-direction: column; min-height: 100vh; color: var(--texto-oscuro); }
+
+        .main-container { flex: 1; max-width: 1000px; width: 100%; margin: 25px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px; }
+
+        .titulo-expediente { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .titulo-expediente h2 { font-size: 1.4rem; color: #1e293b; }
+        .titulo-expediente a { color: var(--color-principal); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .card h3 { font-size: 1.02rem; color: #1e293b; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.8rem; font-weight: 700; color: #475569; }
+        .form-group input, .form-group select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.88rem; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--color-principal); }
+
+        .btn-save { background: var(--color-principal); color: white; border: none; padding: 9px 18px; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.85rem; margin-top: 6px; }
+        .btn-save:hover { background: var(--color-hover); }
+
+        .estado-actual-box { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .badge-estado { padding: 6px 14px; border-radius: 14px; font-weight: 700; font-size: 0.8rem; background: #eaeff3; color: var(--color-principal); }
+        .cambiar-estado-row { display: flex; gap: 10px; }
+        .cambiar-estado-row select { flex: 1; }
+
+        .timeline { list-style: none; margin-top: 14px; border-left: 2px solid var(--border-color); padding-left: 16px; }
+        .timeline li { margin-bottom: 12px; font-size: 0.85rem; }
+        .timeline li strong { display: block; color: #1e293b; }
+        .timeline li span { color: #64748b; font-size: 0.78rem; }
+
+        .checklist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
+        .checklist-item:last-child { border-bottom: none; }
+        .estado-chip { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+        .estado-Pendiente { background: #fef3c7; color: #b45309; }
+        .estado-Entregado { background: #dcfce7; color: #15803d; }
+        .estado-Rechazado, .estado-Vencido { background: #fee2e2; color: #b91c1c; }
+
+        .form-upload-inline { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+        .form-upload-inline select, .form-upload-inline input[type="file"] { padding: 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.85rem; }
+        .form-upload-inline select { flex: 1; min-width: 160px; }
+
+        .footer { background-color: var(--color-principal); color: white; text-align: center; padding: 12px; font-size: 0.8rem; margin-top: auto; }
+        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <main class="main-container">
+        <div class="titulo-expediente">
+            <h2>Expediente: <span id="tituloVin">—</span></h2>
+            <a href="pantallaPrincipal.html"><i class="fa-solid fa-arrow-left"></i> Volver a Vehículos</a>
+        </div>
+
+        <div class="card">
+            <h3>Datos del vehículo</h3>
+            <form id="formVehiculo">
+                <div class="form-grid">
+                    <div class="form-group"><label>Marca</label><input type="text" id="edMarca" required></div>
+                    <div class="form-group"><label>Modelo</label><input type="text" id="edModelo" required></div>
+                    <div class="form-group"><label>Año</label><input type="number" id="edAnio" required></div>
+                    <div class="form-group"><label>Cilindrada (CC)</label><input type="number" id="edCilindrada"></div>
+                    <div class="form-group"><label>Origen / Subasta</label>
+                        <select id="edOrigen">
+                            <option value="Copart">Copart</option><option value="IAAI">IAAI</option>
+                            <option value="Manheim">Manheim</option><option value="Particular">Particular</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Lote #</label><input type="text" id="edLote"></div>
+                    <div class="form-group"><label>Precio de Compra (USD)</label><input type="number" step="0.01" id="edPrecio"></div>
+                    <div class="form-group"><label>Cliente</label><select id="edCliente"><option value="">Inventario propio</option></select></div>
+                </div>
+                <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> Guardar cambios</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Estado logístico</h3>
+            <div class="estado-actual-box">
+                <span>Estado actual:</span>
+                <span class="badge-estado" id="estadoActualTexto">—</span>
+            </div>
+            <div class="cambiar-estado-row">
+                <select id="selectNuevoEstado"><option value="">Cambiar a...</option></select>
+                <button class="btn-save" id="btnCambiarEstado" type="button">Actualizar</button>
+            </div>
+            <ul class="timeline" id="timelineEstados"></ul>
+        </div>
+
+        <div class="card">
+            <h3>Datos aduaneros</h3>
+            <form id="formAduanero">
+                <div class="form-grid">
+                    <div class="form-group"><label>Fecha de llegada</label><input type="date" id="edFechaLlegada"></div>
+                    <div class="form-group"><label>Aduana de ingreso</label><input type="text" id="edAduana" placeholder="Ej. Puerto Quetzal"></div>
+                    <div class="form-group">
+                        <label>Canal de verificación</label>
+                        <select id="edCanal">
+                            <option value="">Sin asignar</option>
+                            <option value="Verde">Verde</option>
+                            <option value="Amarillo">Amarillo</option>
+                            <option value="Rojo">Rojo</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> Guardar datos aduaneros</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Checklist documental</h3>
+            <div id="checklistContainer"></div>
+            <form id="formSubirDoc" class="form-upload-inline">
+                <select id="reqSelectExp" required><option value="">Seleccione el requisito...</option></select>
+                <input type="file" id="archivoFisicoExp" required accept=".pdf,image/jpeg,image/png">
+                <button type="submit" class="btn-save"><i class="fa-solid fa-cloud-arrow-up"></i> Subir</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Fotos del vehículo</h3>
+            <p style="font-size:0.82rem; color:#64748b; margin-bottom:12px;">Fotos de la subasta y de cómo se recibió el vehículo, no son documentos legales.</p>
+
+            <form id="formSubirFotos" class="form-upload-inline">
+                <select id="categoriaFoto" required>
+                    <option value="Subasta">Fotos de Subasta</option>
+                    <option value="Recepcion">Fotos de Recepción</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <input type="file" id="archivosFotos" multiple required accept="image/jpeg,image/png">
+                <button type="submit" class="btn-save"><i class="fa-solid fa-cloud-arrow-up"></i> Subir fotos</button>
+            </form>
+
+            <div id="galeriaFotos" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-top:16px;"></div>
+        </div>
+    </main>
+
+    <footer class="footer">Importadora Los Gemelos &copy; 2026</footer>
+
+    <script src="/components/navbar.js" defer></script>
+    <script src="/js/expediente.js" defer></script>
+</body>
+</html>

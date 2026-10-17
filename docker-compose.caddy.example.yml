@@ -1,0 +1,25 @@
+# Fragmento para integrar con la configuración existente del backend y la base de datos.
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    command: caddy run --config /etc/caddyfile
+    depends_on:
+      - backend
+
+  backend:
+    # No publiques el puerto 3000 al host; Caddy es el único punto de entrada.
+    environment:
+      - NODE_ENV=production
+      - FRONTEND_ORIGIN=https://tudominio.com
+
+volumes:
+  caddy_data:
+  caddy_config:

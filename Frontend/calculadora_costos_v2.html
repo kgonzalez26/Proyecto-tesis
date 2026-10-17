@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador de Costos e Impuestos de Importación</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+
+    <style>
+        :root {
+            --color-principal: #6A89A7;
+            --color-hover: #56718A;
+            --color-fondo: #f4f4f4;
+            --texto-blanco: #ffffff;
+            --texto-oscuro: #333333;
+            --color-exito: #52a05e;
+            --color-error: #c0392b;
+            --color-advertencia: #b8860b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body { background-color: var(--color-fondo); display: flex; flex-direction: column; min-height: 100vh; }
+
+        .container { flex: 1; max-width: 1000px; width: 100%; margin: 30px auto; padding: 0 20px; }
+        h2 { color: var(--texto-oscuro); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        p.desc { color: #666; margin-bottom: 25px; font-size: 0.95rem; }
+
+        .card-calculadora { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 30px; max-width: 700px; margin: 0 auto; }
+
+        .seccion-titulo { font-size: 0.85rem; font-weight: 700; color: var(--color-principal); margin: 20px 0 10px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e0e0e0; padding-bottom: 6px; }
+        .seccion-titulo:first-child { margin-top: 0; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group.full-width { grid-column: span 2; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--texto-oscuro); font-size: 0.9rem; }
+        .input-group input, .input-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.95rem; outline: none; }
+        .input-group input:focus, .input-group select:focus { border-color: var(--color-principal); }
+        .input-group .hint { font-size: 0.75rem; color: #888; margin-top: 3px; display: block; }
+
+        .gastos-lista { margin-bottom: 10px; }
+        .gasto-fila { display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; margin-bottom: 8px; align-items: center; }
+        .gasto-fila input, .gasto-fila select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        .btn-quitar-gasto { background: none; border: none; color: var(--color-error); cursor: pointer; font-size: 1rem; padding: 4px 8px; }
+        .btn-agregar-gasto { background: none; border: 1px dashed var(--color-principal); color: var(--color-principal); padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; width: 100%; margin-bottom: 10px; }
+        .btn-agregar-gasto:hover { background: #eaeff3; }
+
+        .btn-calcular { width: 100%; padding: 12px; background-color: var(--color-principal); color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-calcular:hover { background-color: var(--color-hover); }
+
+        .resultados { margin-top: 25px; background: #eaeff3; padding: 20px; border-radius: 6px; border-left: 5px solid var(--color-principal); }
+        .resultado-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 1rem; color: var(--texto-oscuro); }
+        .cantidades { text-align: right; }
+        .usd-val { font-weight: 600; color: var(--texto-oscuro); }
+        .gtq-val { display: block; font-size: 0.85rem; color: #666; margin-top: 2px; }
+
+        .total-final { font-size: 1.2rem; border-top: 2px solid #ddd; padding-top: 15px; margin-top: 10px; font-weight: bold; }
+        .total-final .usd-val { color: var(--texto-oscuro); font-size: 1.3rem; }
+
+        .panel-rentabilidad { margin-top: 15px; background: #fff; border-radius: 6px; padding: 15px; border: 1px solid #d8e0e8; }
+        .panel-rentabilidad .resultado-item.margen-positivo .usd-val { color: var(--color-exito); }
+        .panel-rentabilidad .resultado-item.margen-negativo .usd-val { color: var(--color-error); }
+        .alerta-margen { font-size: 0.85rem; padding: 8px 10px; border-radius: 4px; margin-top: 8px; display: none; }
+        .alerta-margen.visible { display: block; }
+        .alerta-margen.riesgo { background: #fdecea; color: var(--color-error); }
+        .alerta-margen.ok { background: #eaf6ec; color: var(--color-exito); }
+
+        .acciones-resultado { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-guardar { flex: 1; padding: 10px; background-color: var(--color-exito); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-guardar:hover { opacity: 0.9; }
+        .btn-guardar:disabled { background-color: #a9c2ad; cursor: not-allowed; }
+        .estado-guardado { font-size: 0.85rem; text-align: center; margin-top: 8px; min-height: 1.2em; }
+        .estado-guardado.ok { color: var(--color-exito); }
+        .estado-guardado.error { color: var(--color-error); }
+
+        .note { font-size: 0.8rem; color: #777; text-align: center; margin-top: 20px; line-height: 1.4; }
+        .note.advertencia { color: var(--color-advertencia); font-weight: 600; }
+
+        .footer { background-color: var(--color-principal); color: white; text-align: center; padding: 10px; font-size: 0.8rem; margin-top: auto; }
+
+        @media (max-width: 768px) {
+            .container { padding: 0 15px; margin: 20px auto; }
+            .form-grid { grid-template-columns: 1fr; gap: 0; }
+            .card-calculadora { padding: 20px; }
+            .gasto-fila { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="container">
+        <h2><i class="fa-solid fa-calculator"></i> Cotizador de Costos, Impuestos y Rentabilidad</h2>
+        <p class="desc">Proyecte la inversión total por vehículo (CIF + impuestos + gastos operativos) y valide el margen antes de aprobar la compra o cotizarlo a un cliente.</p>
+
+        <div class="card-calculadora">
+            <form id="calcForm">
+
+                <div class="seccion-titulo">Datos del vehículo</div>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Marca</label>
+                        <input type="text" id="marca" required placeholder="Ej. Toyota">
+                    </div>
+                    <div class="input-group">
+                        <label>Modelo</label>
+                        <input type="text" id="modelo" required placeholder="Ej. Hilux">
+                    </div>
+                    <div class="input-group">
+                        <label>Año</label>
+                        <input type="number" id="anio" required min="1980" max="2027" placeholder="Ej. 2022">
+                    </div>
+                    <div class="input-group">
+                        <label>Cilindrada (CC)</label>
+                        <input type="number" id="cilindrada" min="0" placeholder="Ej. 2400">
+                        <span class="hint">Necesario porque IPRIMA/ISCV se calculan por cc, no como % plano.</span>
+                    </div>
+                </div>
+
+                <div class="seccion-titulo">Valores CIF</div>
+                <div class="input-group full-width">
+                    <label>Precio del Vehículo en Origen (USD)</label>
+                    <input type="number" id="precioVehiculo" required placeholder="Ej. 5000" min="0" step="0.01">
+                </div>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Flete Marítimo (USD)</label>
+                        <input type="number" id="flete" value="1200" required min="0" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>Seguro de Transporte (USD)</label>
+                        <input type="number" id="seguro" value="150" required min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="input-group full-width">
+                    <label>Tasa de Cambio (Quetzales por $1.00)</label>
+                    <input type="number" id="tasaCambio" value="7.80" required min="1" step="0.01">
+                    <span class="hint">Confirme la tasa del día antes de guardar la cotización final.</span>
+                </div>
+
+                <div class="seccion-titulo">Tasas de impuestos aplicables</div>
+                <p class="hint" style="margin-bottom:10px; display:block;">
+                    Editables porque dependen de la clasificación arancelaria del vehículo y cambian por normativa.
+                    <strong>Verifique con su agente aduanal / tabla vigente de SAT antes de cotizar</strong> — desde 2012 el DAI para vehículos terrestres suele ser 0%, y el IPRIMA real de SAT se calcula por tabla de cc/valor, no como % fijo. Los valores por defecto son solo un punto de partida editable.
+                </p>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>DAI (%)</label>
+                        <input type="number" id="tasaDai" value="0" min="0" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>IVA (%)</label>
+                        <input type="number" id="tasaIva" value="12" min="0" step="0.01">
+                    </div>
+                    <div class="input-group full-width">
+                        <label>IPRIMA estimado (USD, monto fijo por tabla)</label>
+                        <input type="number" id="iprimaFijo" value="0" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <div class="seccion-titulo">Gastos operativos adicionales</div>
+                <div class="gastos-lista" id="gastosLista"></div>
+                <button type="button" class="btn-agregar-gasto" id="btnAgregarGasto">
+                    <i class="fa-solid fa-plus"></i> Agregar gasto (agente aduanal, almacenaje, transporte interno, placas...)
+                </button>
+
+                <div class="seccion-titulo">Rentabilidad</div>
+                <div class="form-grid">
+                    <div class="input-group full-width">
+                        <label>Precio de venta propuesto (USD)</label>
+                        <input type="number" id="precioVenta" min="0" step="0.01" placeholder="Ej. 8500">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-calcular">
+                    <i class="fa-solid fa-calculator"></i> Procesar Cálculo Operativo
+                </button>
+            </form>
+
+            <div class="resultados" id="panelResultados" style="display: none;">
+                <div class="resultado-item">
+                    <span>Valor CIF (Base Imponible):</span>
+                    <div class="cantidades"><span class="usd-val" id="cifUsd">$0.00</span><span class="gtq-val" id="cifGtq">Q0.00</span></div>
+                </div>
+                <div class="resultado-item">
+                    <span style="color: var(--color-error); font-weight: 600;">Impuestos Proyectados (DAI+IVA+IPRIMA):</span>
+                    <div class="cantidades"><span class="usd-val" id="impUsd" style="color: var(--color-error);">$0.00</span><span class="gtq-val" id="impGtq">Q0.00</span></div>
+                </div>
+                <div class="resultado-item">
+                    <span>Gastos operativos adicionales:</span>
+                    <div class="cantidades"><span class="usd-val" id="gastosUsd">$0.00</span><span class="gtq-val" id="gastosGtq">Q0.00</span></div>
+                </div>
+                <div class="resultado-item total-final">
+                    <span>Costo Total de Inversión:</span>
+                    <div class="cantidades"><span class="usd-val" id="totalUsd">$0.00</span><span class="gtq-val" id="totalGtq">Q0.00</span></div>
+                </div>
+
+                <div class="panel-rentabilidad">
+                    <div class="resultado-item">
+                        <span>Precio de venta propuesto:</span>
+                        <div class="cantidades"><span class="usd-val" id="ventaUsd">$0.00</span></div>
+                    </div>
+                    <div class="resultado-item" id="filaMargenUsd">
+                        <span>Margen bruto estimado:</span>
+                        <div class="cantidades"><span class="usd-val" id="margenUsd">$0.00</span></div>
+                    </div>
+                    <div class="resultado-item" id="filaMargenPct">
+                        <span>Margen sobre venta:</span>
+                        <div class="cantidades"><span class="usd-val" id="margenPct">0.00%</span></div>
+                    </div>
+                    <div class="alerta-margen" id="alertaMargen"></div>
+                </div>
+
+                <div class="acciones-resultado">
+                    <button type="button" class="btn-guardar" id="btnGuardar">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar como cotización
+                    </button>
+                </div>
+                <div class="estado-guardado" id="estadoGuardado"></div>
+            </div>
+
+            <p class="note">* Estimación interna. Ajuste las tasas de impuestos a la normativa vigente y a la clasificación arancelaria específica del vehículo antes de comprometer una compra u ofertar a un cliente.</p>
+        </div>
+    </div>
+
+    <footer class="footer">Importadora Los Gemelos &copy; 2026</footer>
+
+    <script src="/components/navbar.js" defer></script>
+    <script src="/js/calculadoraCostos.js" defer></script>
+</body>
+</html>

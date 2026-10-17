@@ -1,266 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios</title>
-    <script>
-        const sesionActiva = localStorage.getItem('usuarioLogueado');
-
-        if (!sesionActiva) {
-            window.location.replace('login.html');
-        }
-    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/navbar.css">
     <style>
         :root {
-            --color-principal: #6A89A7;
-            --color-hover: #56718A;
-            --color-fondo: #f4f4f4;
-            --texto-oscuro: #333333;
-            --color-peligro: #cb4343;
-            --color-edicion: #f39c12;
+            --color-principal: #0F2A43; --color-hover: #F59E0B; --color-fondo: #f4f4f4;
+            --texto-oscuro: #333333; --color-peligro: #cb4343; --color-edicion: #f39c12; --color-llave: #27ae60;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--color-fondo); display: flex; flex-direction: column; min-height: 100vh; }
+        .container { flex: 1; max-width: 950px; width: 100%; margin: 30px auto; padding: 0 20px; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
+        .card-formulario, .card-tabla { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); margin-bottom: 25px; }
+        .card-formulario { border-left: 5px solid var(--color-principal); }
+        .modo-edicion { border-left-color: var(--color-edicion); }
 
-        body {
-            background-color: var(--color-fondo);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 0.9rem; color: #555; font-weight: 500; }
+        .input-group input, .input-group select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
 
-        .navbar {
-            background-color: var(--color-principal);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+        .form-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 10px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-guardar { background-color: var(--color-principal); }
+        .btn-cancelar { background-color: #95a5a6; display: none; }
 
-        .btn-regresar {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; }
+        th { background-color: #eaeff3; color: var(--texto-oscuro); }
 
-        .container {
-            flex: 1;
-            max-width: 900px;
-            width: 100%;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; background: #e3effa; color: #2b6cb0; }
+        .badge-inactivo { background: #fee2e2; color: #b91c1c; margin-left: 6px; }
+        .actions-btns { display: flex; gap: 6px; }
+        .btn-action { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-edit { background-color: var(--color-edicion); }
+        .btn-reset { background-color: var(--color-llave); }
+        .btn-toggle { background-color: var(--color-peligro); }
+        .btn-link { background-color: #2563eb; }
 
-        .card-formulario {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-            border-left: 5px solid var(--color-principal);
-        }
-
-        .modo-edicion {
-            border-left-color: var(--color-edicion);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .input-group label {
-            font-size: 0.9rem;
-            color: #555;
-            font-weight: 500;
-        }
-
-        .input-group input,
-        .input-group select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .btn {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .btn-guardar {
-            background-color: var(--color-principal);
-        }
-
-        .btn-cancelar {
-            background-color: #95a5a6;
-            display: none;
-        }
-
-        .card-tabla {
-            background: white;
-            border-radius: 8px;
-            overflow-x: auto;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th,
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #eaeff3;
-            color: var(--texto-oscuro);
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            background: #e3effa;
-            color: #2b6cb0;
-        }
-
-        .actions-btns {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-action {
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-        }
-
-        .btn-edit {
-            background-color: var(--color-edicion);
-        }
-
-        .btn-delete {
-            background-color: var(--color-peligro);
-        }
-
-        @media (max-width: 768px) {
-            .navbar {
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
-                padding: 10px;
-            }
-
-            .container {
-                padding: 0 15px;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .form-actions .btn {
-                width: 100%;
-            }
-
-            .actions-btns {
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-
-            .actions-btns .btn-action {
-                flex: 1 1 48%;
-            }
-
-            table th,
-            table td {
-                padding: 10px 8px;
-                font-size: 0.9rem;
-            }
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 400px; }
     </style>
 </head>
-
 <body>
 
-    <nav class="navbar">
-        <a href="pantallaPrincipal.html" class="btn-regresar"><i class="fa-solid fa-arrow-left"></i> <span>Volver al
-                Menú</span></a>
-        <div><strong>Administración de Sistema</strong></div>
-    </nav>
+    <div id="navbar-placeholder"></div>
 
     <div class="container">
-        <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-users-gear"></i> Gestión de Usuarios</h2>
+        <h2 style="margin-bottom: 20px;">Gestión de Usuarios</h2>
 
         <div class="card-formulario" id="formCard">
             <form id="usuarioForm">
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Nombre Completo</label>
-                        <input type="text" id="nombre" required placeholder="">
+                        <input type="text" id="nombre" required>
                     </div>
                     <div class="input-group">
                         <label>Correo Electrónico</label>
-                        <input type="email" id="email" required placeholder="">
+                        <input type="email" id="email" required>
                     </div>
                     <div class="input-group">
                         <label>Rol del Sistema</label>
-                        <select id="rol_id" required>
-                            <option value="">Seleccione un rol...</option>
-                            <option value="1">Administrador</option>
-                            <option value="2">Logística</option>
-                            <option value="3">Finanzas</option>
-                        </select>
+                        <select id="rol" required><option value="">Cargando roles...</option></select>
                     </div>
-                    <div class="input-group">
-                        <label>Contraseña</label>
-                        <input type="password" id="contrasena" placeholder="Mínimo 6 caracteres" minlength="6">
-                        <small id="passHint" style="color:#777; font-size:0.75rem;">Obligatoria para usuarios
-                            nuevos.</small>
+                    <div class="input-group" id="passContainer">
+                        <label>Contraseña Inicial</label>
+                        <input type="password" id="contrasena" minlength="8" placeholder="Mínimo 8 caracteres">
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" id="btnSubmit" class="btn btn-guardar"><i class="fa-solid fa-plus"></i>
-                        Registrar Usuario</button>
-                    <button type="button" id="btnCancel" class="btn btn-cancelar" onclick="cancelarEdicion()"><i
-                            class="fa-solid fa-xmark"></i> Cancelar</button>
+                    <button type="submit" id="btnSubmit" class="btn btn-guardar"><i class="fa-solid fa-plus"></i> Registrar Usuario</button>
+                    <button type="button" id="btnCancel" class="btn btn-cancelar"><i class="fa-solid fa-xmark"></i> Cancelar</button>
                 </div>
             </form>
         </div>
@@ -268,139 +83,74 @@
         <div class="card-tabla">
             <table>
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Correo Electrónico</th>
-                        <th>Nivel de Acceso (Rol)</th>
-                        <th>Contraseña (DB)</th>
-                        <th>Acciones</th>
-                    </tr>
+                    <tr><th>ID</th><th>Usuario / Correo</th><th>Rol</th><th>Acciones</th></tr>
                 </thead>
                 <tbody id="tablaUsuarios"></tbody>
             </table>
         </div>
+
+        <div class="card-tabla">
+            <h3 style="margin-bottom:14px; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                 Registro de actividad
+            </h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:end;">
+                <div class="input-group" style="min-width:160px;">
+                    <label>Usuario</label>
+                    <select id="filtroLogUsuario"><option value="">Todos</option></select>
+                </div>
+                <div class="input-group" style="min-width:160px;">
+                    <label>Acción</label>
+                    <select id="filtroLogAccion"><option value="">Todas</option></select>
+                </div>
+                <div class="input-group"><label>Desde</label><input type="date" id="filtroLogDesde"></div>
+                <div class="input-group"><label>Hasta</label><input type="date" id="filtroLogHasta"></div>
+                <button type="button" class="btn btn-guardar" style="flex:none; padding:10px 18px;" id="btnFiltrarLogs">Filtrar</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr>
+                </thead>
+                <tbody id="tablaLogs"></tbody>
+            </table>
+        </div>
     </div>
 
-    <script>
-        const API_URL = 'http://localhost:3000/api/usuarios';
-        let modoEdicion = false;
-        let idUsuarioActual = null;
+    <div class="modal" id="modalReset">
+        <div class="modal-content">
+            <h3>Cambiar Contraseña</h3>
+            <p id="resetUserText" style="margin: 10px 0; font-size: 0.9rem; color: #666;"></p>
+            <div class="input-group">
+                <label>Nueva Contraseña</label>
+                <input type="password" id="nuevaContrasena" minlength="8" placeholder="Mínimo 8 caracteres">
+            </div>
+            <div class="form-actions" style="margin-top:15px;">
+                <button type="button" class="btn btn-guardar" id="btnEjecutarReset">Actualizar</button>
+                <button type="button" class="btn btn-cancelar" style="display:block;" id="btnCerrarModalReset">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-        // 1. READ
-        async function cargarUsuarios() {
-            try {
-                const res = await fetch(API_URL);
-                if (!res.ok) return console.error("Error en el backend al obtener usuarios");
+    <div class="modal" id="modalVincular">
+        <div class="modal-content">
+            <h3>Vincular con un cliente</h3>
+            <p id="vincularUserText" style="margin: 10px 0; font-size: 0.9rem; color: #666;"></p>
+            <div class="input-group">
+                <label>Cliente</label>
+                <select id="selectVincularCliente"></select>
+            </div>
+            <p style="font-size:0.78rem; color:#888; margin-top:8px;">Al vincular, esta cuenta verá en su portal únicamente los vehículos asignados a ese cliente.</p>
+            <div class="form-actions" style="margin-top:15px;">
+                <button type="button" class="btn btn-guardar" id="btnGuardarVinculo">Guardar</button>
+                <button type="button" class="btn btn-cancelar" style="display:block;" id="btnCerrarVinculo">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-                const usuarios = await res.json();
-                const tbody = document.getElementById('tablaUsuarios');
-                tbody.innerHTML = '';
+    <footer style="background-color: var(--color-principal); color: white; text-align: center; padding: 10px; font-size: 0.8rem; margin-top: auto;">
+        Importadora Los Gemelos &copy; 2026
+    </footer>
 
-                usuarios.forEach(user => {
-                    const tr = document.createElement('tr');
-
-                    // Controlamos si la contraseña existe antes de recortarla para pruebas
-                    const passTexto = user.contrasena ? user.contrasena : 'Sin contraseña';
-                    const passVisual = passTexto.length > 20 ? passTexto.substring(0, 20) + '...' : passTexto;
-
-                    // Si por alguna razón el usuario no tiene rol en la tabla puente saldrá como 'Sin Rol'
-                    const rolVisual = user.nombre_rol ? user.nombre_rol : 'Sin Rol';
-
-                    tr.innerHTML = `
-                    <td>${user.id}</td>
-                    <td><strong>${user.nombre}</strong><br><small>${user.email}</small></td>
-                    <td><span class="badge">${rolVisual}</span></td>
-                    <td style="font-family: monospace; font-size: 0.8rem; color: #7f8c8d;">${passVisual}</td>
-                    <td>
-                        <div class="actions-btns">
-                            <button class="btn-action btn-edit" onclick="prepararEdicion(${user.id}, '${user.nombre}', '${user.email}', ${user.rol_id || 'null'})"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-action btn-delete" onclick="eliminarUsuario(${user.id})"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </td>
-                `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) { console.error("Error en la petición de red:", error); }
-        }
-
-        // 2. CREATE / UPDATE
-        document.getElementById('usuarioForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const datos = {
-                nombre: document.getElementById('nombre').value,
-                email: document.getElementById('email').value,
-                rol_id: parseInt(document.getElementById('rol_id').value),
-                contraseña: document.getElementById('contrasena').value
-            };
-
-            if (!modoEdicion && !datos.contraseña) {
-                alert("La contraseña es obligatoria para nuevos usuarios.");
-                return;
-            }
-
-            try {
-                const res = await fetch(modoEdicion ? `${API_URL}/${idUsuarioActual}` : API_URL, {
-                    method: modoEdicion ? 'PUT' : 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datos)
-                });
-
-                if (res.ok) {
-                    alert(modoEdicion ? "Usuario actualizado correctamente" : "Usuario creado correctamente");
-                    cancelarEdicion();
-                    cargarUsuarios();
-                } else {
-                    alert("Ocurrió un problema en el servidor al procesar el usuario.");
-                }
-            } catch (error) { console.error("Error al enviar el formulario:", error); }
-        });
-
-        // 3. Preparar Interfaz para Modificar
-        function prepararEdicion(id, nombre, email, rol_id) {
-            modoEdicion = true;
-            idUsuarioActual = id;
-
-            document.getElementById('nombre').value = nombre;
-            document.getElementById('email').value = email;
-            document.getElementById('rol_id').value = rol_id !== null ? rol_id : '';
-            document.getElementById('contrasena').value = '';
-
-            document.getElementById('passHint').innerText = "Dejar en blanco para mantener la actual.";
-            document.getElementById('contrasena').removeAttribute('required');
-
-            document.getElementById('formCard').classList.add('modo-edicion');
-            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-save"></i> Guardar Cambios';
-            document.getElementById('btnSubmit').style.backgroundColor = 'var(--color-edicion)';
-            document.getElementById('btnCancel').style.display = 'block';
-        }
-
-        // 4. Cancelar y limpiar formulario
-        function cancelarEdicion() {
-            modoEdicion = false;
-            idUsuarioActual = null;
-
-            document.getElementById('usuarioForm').reset();
-            document.getElementById('passHint').innerText = "Obligatoria para usuarios nuevos.";
-
-            document.getElementById('formCard').classList.remove('modo-edicion');
-            document.getElementById('btnSubmit').innerHTML = '<i class="fa-solid fa-plus"></i> Registrar Usuario';
-            document.getElementById('btnSubmit').style.backgroundColor = 'var(--color-principal)';
-            document.getElementById('btnCancel').style.display = 'none';
-        }
-
-        // 5. DELETE
-        async function eliminarUsuario(id) {
-            if (!confirm("¿Dar de baja a este usuario? Perderá el acceso de inmediato.")) return;
-            try {
-                const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    cargarUsuarios();
-                } else {
-                    alert("No se pudo dar de baja al usuario.");
-                }
-            } catch (error) { console.error("Error al eliminar:", error); }
-        }
-
-        window.onload = cargarUsuarios;
-    </script>
+    <script src="/components/navbar.js" defer></script>
+    <script src="/js/usuarios.js" defer></script>
+</body>
+</html>
