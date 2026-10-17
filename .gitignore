@@ -2,14 +2,17 @@
 **/node_modules/
 
 # Variables de entorno y secretos
-.env
-.env.*
+/.env
+/Backend/.env
+**/.env
+**/.env.*
 !.env.example
 !.env.*.example
+!**/.env.example
+!**/.env.*.example
 
 # Archivos subidos por usuarios
-/uploads/
-/Backend/uploads/
+**/uploads/
 *.pdf
 
 # Certificados y claves privadas
