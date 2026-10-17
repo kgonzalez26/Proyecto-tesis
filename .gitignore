@@ -2,10 +2,16 @@
 **/node_modules/
 
 # Variables de entorno y secretos
+<<<<<<< HEAD
 /.env
 /Backend/.env
 **/.env
 **/.env.*
+=======
+.env
+.env.*
+**/.env
+>>>>>>> 3566256e270a418077cd299bfa6e73e2cf18d848
 !.env.example
 !.env.*.example
 !**/.env.example
