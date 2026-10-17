@@ -28,3 +28,8 @@ data/
 *.svg
 *.webp
 *.ico
+
+# Datos y certificados SSL locales generados por Caddy
+.caddy/
+caddy_data/
+caddy_config/
