@@ -1,0 +1,30 @@
+# === TEMPLATE DE NODE.JS ===
+# Dependencias de Express / Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# === CONFIGURACIONES DE DOCKER Y LOCALES ===
+.env
+
+.dbdata/
+mysql_data/
+data/
+
+# Archivos de configuración del IDE
+.vscode/
+.idea/
+
+# Documentos
+*.pdf
+
+# Imágenes y recursos visuales
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.ico
